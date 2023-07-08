@@ -59,9 +59,17 @@ int main(int argc, const char *argv[])
         //// STUDENT ASSIGNMENT
         //// TASK MP.1 -> replace the following code with ring buffer of size dataBufferSize
 
+
+
         // push image into data frame buffer
         DataFrame frame;
         frame.cameraImg = imgGray;
+    
+        if (dataBuffer.size() > dataBufferSize)
+        {
+            dataBuffer.erase(dataBuffer.begin());
+        }
+
         dataBuffer.push_back(frame);
 
         //// EOF STUDENT ASSIGNMENT
@@ -72,6 +80,12 @@ int main(int argc, const char *argv[])
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints; // create empty feature list for current image
         string detectorType = "SHITOMASI";
+        //string detectorType = "HARRIS";
+        //string detectorType = "FAST";
+        //string detectorType = "BRISK";
+        //string detectorType = "ORB";
+        //string detectorType = "AKAZE";
+        //string detectorType = "SIFT";
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
@@ -79,12 +93,19 @@ int main(int argc, const char *argv[])
 
         if (detectorType.compare("SHITOMASI") == 0)
         {
-            detKeypointsShiTomasi(keypoints, imgGray, false);
+            detKeypointsShiTomasi(keypoints, imgGray, true);
         }
+
+        else if (detectorType.compare("HARRIS") == 0)
+        {
+            detKeypointsHarris(keypoints, imgGray, true);
+        }
+
         else
         {
-            //...
+            detKeypointsModern(keypoints, imgGray, detectorType, true);
         }
+
         //// EOF STUDENT ASSIGNMENT
 
         //// STUDENT ASSIGNMENT
@@ -95,9 +116,21 @@ int main(int argc, const char *argv[])
         cv::Rect vehicleRect(535, 180, 180, 150);
         if (bFocusOnVehicle)
         {
-            // ...
+            for(auto it = keypoints.begin(); it != keypoints.end(); ++it)
+            {
+                if (!(vehicleRect.contains(it->pt)))
+                {
+                    it = keypoints.erase(it);
+                }
+                else
+                {
+                    continue;
+                }
+                
+            }
         }
 
+        cout<<"Number on preceeding vehicle: "<<keypoints.size()<<endl;
         //// EOF STUDENT ASSIGNMENT
 
         // optional : limit number of keypoints (helpful for debugging and learning)
@@ -183,3 +216,5 @@ int main(int argc, const char *argv[])
 
     return 0;
 }
+
+
